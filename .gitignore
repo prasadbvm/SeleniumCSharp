@@ -1,0 +1,31 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+/bin/
+/obj/
+
+# Rider
+.idea/
+
+# DotNet
+.project.lock.json
+project.lock.json
+artifacts/
+
+# Logs
+*.log
+stacktrace.txt
+
+# NuGet
+*.nupkg
+packages/
+
+# Others
+*.DS_Store
+*.env
+.env.local
