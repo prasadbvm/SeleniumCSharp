@@ -68,6 +68,30 @@ jobs:
         with:
           name: docker-image
           path: image.tar
+      - name: Push image to Docker Hub
+        if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          IMAGE_TAG="${{ github.repository }}:${{ github.sha }}"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}:${{ github.sha }}"
+          echo "Logging in to Docker Hub as ${{ secrets.DOCKERHUB_USERNAME }}"
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker tag "$IMAGE_TAG" "$IMAGE_NAME"
+          docker push "$IMAGE_NAME"
+
+      - name: Push image to Azure Container Registry
+        if: ${{ secrets.ACR_NAME && secrets.AZURE_ACR_LOGIN_SERVER && secrets.AZURE_CREDENTIALS }}
+        run: |
+          set -euo pipefail
+          IMAGE_TAG="${{ github.repository }}:${{ github.sha }}"
+          ACR_LOGIN_SERVER="${{ secrets.AZURE_ACR_LOGIN_SERVER }}"
+          IMAGE_NAME="$ACR_LOGIN_SERVER/${{ github.repository }}:${{ github.sha }}"
+          echo "Logging in to Azure using AZURE_CREDENTIALS"
+          echo '${{ secrets.AZURE_CREDENTIALS }}' > /tmp/azure_creds.json
+          az login --service-principal -u $(jq -r .clientId /tmp/azure_creds.json) -p $(jq -r .clientSecret /tmp/azure_creds.json) --tenant $(jq -r .tenantId /tmp/azure_creds.json)
+          az acr login --name "${{ secrets.ACR_NAME }}"
+          docker tag "$IMAGE_TAG" "$IMAGE_NAME"
+          docker push "$IMAGE_NAME"
 
   deploy-dev:
     name: Deploy to Dev
