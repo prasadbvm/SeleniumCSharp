@@ -17,3 +17,38 @@ Notes:
   Copy the resulting JSON and add it as a repository secret named <ENV>_AZURE_CREDENTIALS (replace <ENV> with DEV/QA/PROD).
 - The azure/webapps-deploy action expects the service principal to have access to the target resource.
 - Optionally add additional secrets for other providers: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, GCP_SA_KEY
+
+Sample Azure CLI commands
+-------------------------
+Use these commands to provision a Resource Group, App Service plan and Web App, and to create a service principal (SDK auth JSON) suitable for the azure/login action.
+
+1) Login and set subscription
+
+   az login
+   az account set --subscription "<SUBSCRIPTION_ID>"
+
+2) Create resource group
+
+   az group create --name <RESOURCE_GROUP> --location eastus
+
+3) Create an App Service plan (Linux example)
+
+   az appservice plan create --name <APP_SERVICE_PLAN> --resource-group <RESOURCE_GROUP> --is-linux --sku B1
+
+4) Create a Web App (adjust runtime as needed for your target .NET version)
+
+   az webapp create --resource-group <RESOURCE_GROUP> --plan <APP_SERVICE_PLAN> --name <WEBAPP_NAME> --runtime "DOTNET|8.0"
+
+   If you prefer container-based deployment, use --deployment-container-image-name instead of --runtime.
+
+5) Create a service principal and output SDK auth JSON (copy this JSON into the repository secret, e.g. DEV_AZURE_CREDENTIALS)
+
+   az ad sp create-for-rbac --name "github-actions-<ENV>" --role contributor --scopes /subscriptions/<SUBSCRIPTION_ID> --sdk-auth
+
+   The above command prints a JSON blob; paste the entire JSON value into the corresponding <ENV>_AZURE_CREDENTIALS secret in GitHub.
+
+6) (Optional) From your local machine you can deploy a published package with the Azure CLI
+
+   az webapp deploy --resource-group <RESOURCE_GROUP> --name <WEBAPP_NAME> --src-path ./publish_output --type zip
+
+Replace the angle-bracket placeholders with your values. Keep the service principal JSON secret and limited to the minimum required role for deployment.
