@@ -58,6 +58,16 @@ jobs:
         with:
           name: test-results
           path: '**/TestResults/**/*.trx'
+      - name: Build Docker image
+        run: |
+          IMAGE_TAG="${{ github.repository }}:${{ github.sha }}"
+          docker build -t "$IMAGE_TAG" .
+          docker save "$IMAGE_TAG" -o image.tar
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar
 
   deploy-dev:
     name: Deploy to Dev

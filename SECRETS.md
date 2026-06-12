@@ -24,6 +24,15 @@ Notes:
 - The azure/webapps-deploy action expects the service principal to have access to the target resource.
 - Optionally add additional secrets for other providers: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, GCP_SA_KEY
 
+Docker registry (optional)
+--------------------------
+If you want GitHub Actions to push built images to a container registry, add the appropriate secrets:
+
+- DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (or DOCKERHUB_PASSWORD)
+- OR use an Azure Container Registry with AZURE_ACR_LOGIN_SERVER and a service principal in AZURE_ACR_PASSWORD / AZURE_ACR_USERNAME
+
+In the workflow we currently export the built image as an artifact (image.tar). To push to a registry, add a step that logs in and pushes the image after building.
+
 Sample Azure CLI commands
 -------------------------
 Use these commands to provision a Resource Group, App Service plan and Web App, and to create a service principal (SDK auth JSON) suitable for the azure/login action.
