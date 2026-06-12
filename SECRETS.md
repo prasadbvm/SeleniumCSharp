@@ -1,21 +1,19 @@
 Repository secrets to set for CI/CD deploys
 
-Add these repository secrets (Settings -> Secrets -> Actions) before enabling deploys:
+Add these repository secrets (Settings -> Secrets -> Actions) before enabling deploys for Azure Web Apps:
 
-- DEV_SSH_PRIVATE_KEY: private SSH key for deploy user on dev host
-- DEV_HOST: hostname or IP for dev server (e.g. dev.example.com)
-- DEV_USER: SSH user for dev deploy
+- DEV_AZURE_CREDENTIALS: JSON output of `az ad sp create-for-rbac --name "github-actions-dev" --role contributor --scopes /subscriptions/{sub}` (store entire JSON)
+- DEV_WEBAPP_NAME: Name of the Azure Web App for dev (e.g. myapp-dev)
 
-- QA_SSH_PRIVATE_KEY: private SSH key for deploy user on qa host
-- QA_HOST: hostname or IP for qa server
-- QA_USER: SSH user for qa deploy
+- QA_AZURE_CREDENTIALS: JSON credentials for QA service principal
+- QA_WEBAPP_NAME: Name of the Azure Web App for qa
 
-- PROD_SSH_PRIVATE_KEY: private SSH key for deploy user on prod host
-- PROD_HOST: hostname or IP for prod server
-- PROD_USER: SSH user for prod deploy
+- PROD_AZURE_CREDENTIALS: JSON credentials for Prod service principal
+- PROD_WEBAPP_NAME: Name of the Azure Web App for prod
 
 Notes:
-- Generate a deploy key pair on your control machine with: ssh-keygen -t ed25519 -C "deploy@github-actions" -f deploy_key
-- Add the public key (deploy_key.pub) to the target server's ~/.ssh/authorized_keys for the deploy user.
-- Keep private keys secret and paste them into GitHub repository secrets.
-- Optionally add additional secrets for cloud providers: AZURE_CREDENTIALS, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, GCP_SA_KEY
+- Create a service principal and capture JSON with Azure CLI:
+  az ad sp create-for-rbac --name "github-actions-<env>" --role contributor --scopes /subscriptions/{subscription-id}
+  Copy the resulting JSON and add it as a repository secret named <ENV>_AZURE_CREDENTIALS (replace <ENV> with DEV/QA/PROD).
+- The azure/webapps-deploy action expects the service principal to have access to the target resource.
+- Optionally add additional secrets for other providers: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, GCP_SA_KEY

@@ -70,23 +70,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-publish
-      - name: Configure SSH (uses secrets)
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Azure Login (Dev)
+        uses: azure/login@v1
         with:
-          ssh-private-key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
-      - name: Add deploy host to known_hosts
-        run: |
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
-        env:
-          DEPLOY_HOST: ${{ secrets.DEV_HOST }}
-      - name: Deploy to DEV host via SCP (placeholder)
-        env:
-          DEPLOY_HOST: ${{ secrets.DEV_HOST }}
-          DEPLOY_USER: ${{ secrets.DEV_USER }}
-        run: |
-          echo "Deploying to DEV ${DEPLOY_USER}@${DEPLOY_HOST}"
-          scp -r publish_output/* ${DEPLOY_USER}@${DEPLOY_HOST}:/var/www/app || echo "SCP failed (placeholder)"
+          creds: ${{ secrets.DEV_AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App (Dev)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.DEV_WEBAPP_NAME }}
+          package: publish_output
 
       - name: Deploy (placeholder)
         run: |
@@ -104,23 +97,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-publish
-      - name: Configure SSH (uses secrets)
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Azure Login (QA)
+        uses: azure/login@v1
         with:
-          ssh-private-key: ${{ secrets.QA_SSH_PRIVATE_KEY }}
-      - name: Add deploy host to known_hosts
-        run: |
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.QA_HOST }} >> ~/.ssh/known_hosts
-        env:
-          DEPLOY_HOST: ${{ secrets.QA_HOST }}
-      - name: Deploy to QA host via SCP (placeholder)
-        env:
-          DEPLOY_HOST: ${{ secrets.QA_HOST }}
-          DEPLOY_USER: ${{ secrets.QA_USER }}
-        run: |
-          echo "Deploying to QA ${DEPLOY_USER}@${DEPLOY_HOST}"
-          scp -r publish_output/* ${DEPLOY_USER}@${DEPLOY_HOST}:/var/www/app || echo "SCP failed (placeholder)"
+          creds: ${{ secrets.QA_AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App (QA)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.QA_WEBAPP_NAME }}
+          package: publish_output
 
       - name: Deploy (placeholder)
         run: |
@@ -138,23 +124,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-publish
-      - name: Configure SSH (uses secrets)
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Azure Login (Prod)
+        uses: azure/login@v1
         with:
-          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-      - name: Add deploy host to known_hosts
-        run: |
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
-        env:
-          DEPLOY_HOST: ${{ secrets.PROD_HOST }}
-      - name: Deploy to PROD host via SCP (placeholder)
-        env:
-          DEPLOY_HOST: ${{ secrets.PROD_HOST }}
-          DEPLOY_USER: ${{ secrets.PROD_USER }}
-        run: |
-          echo "Deploying to PROD ${DEPLOY_USER}@${DEPLOY_HOST}"
-          scp -r publish_output/* ${DEPLOY_USER}@${DEPLOY_HOST}:/var/www/app || echo "SCP failed (placeholder)"
+          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App (Prod)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.PROD_WEBAPP_NAME }}
+          package: publish_output
 
       - name: Deploy (placeholder)
         run: |
