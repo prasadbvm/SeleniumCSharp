@@ -81,6 +81,99 @@ jobs:
           app-name: ${{ secrets.DEV_WEBAPP_NAME }}
           package: publish_output
 
+  smoke-dev:
+    name: Smoke tests (Dev)
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    steps:
+      - name: Run smoke tests against Dev
+        env:
+          DEV_WEBAPP_NAME: ${{ secrets.DEV_WEBAPP_NAME }}
+          DEV_SMOKE_URL: ${{ secrets.DEV_SMOKE_URL }}
+        run: |
+          set -euo pipefail
+          URL="$DEV_SMOKE_URL"
+          if [ -z "$URL" ]; then
+            if [ -n "$DEV_WEBAPP_NAME" ]; then
+              URL="https://${DEV_WEBAPP_NAME}.azurewebsites.net"
+            else
+              echo "No DEV_SMOKE_URL or DEV_WEBAPP_NAME configured"; exit 1
+            fi
+          fi
+          echo "Testing $URL"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || true)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed"
+              exit 0
+            fi
+            sleep $((i*2))
+          done
+          echo "Smoke test failed for $URL"; exit 1
+
+  smoke-qa:
+    name: Smoke tests (QA)
+    runs-on: ubuntu-latest
+    needs: deploy-qa
+    steps:
+      - name: Run smoke tests against QA
+        env:
+          QA_WEBAPP_NAME: ${{ secrets.QA_WEBAPP_NAME }}
+          QA_SMOKE_URL: ${{ secrets.QA_SMOKE_URL }}
+        run: |
+          set -euo pipefail
+          URL="$QA_SMOKE_URL"
+          if [ -z "$URL" ]; then
+            if [ -n "$QA_WEBAPP_NAME" ]; then
+              URL="https://${QA_WEBAPP_NAME}.azurewebsites.net"
+            else
+              echo "No QA_SMOKE_URL or QA_WEBAPP_NAME configured"; exit 1
+            fi
+          fi
+          echo "Testing $URL"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || true)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed"
+              exit 0
+            fi
+            sleep $((i*2))
+          done
+          echo "Smoke test failed for $URL"; exit 1
+
+  smoke-prod:
+    name: Smoke tests (Prod)
+    runs-on: ubuntu-latest
+    needs: deploy-prod
+    steps:
+      - name: Run smoke tests against Prod
+        env:
+          PROD_WEBAPP_NAME: ${{ secrets.PROD_WEBAPP_NAME }}
+          PROD_SMOKE_URL: ${{ secrets.PROD_SMOKE_URL }}
+        run: |
+          set -euo pipefail
+          URL="$PROD_SMOKE_URL"
+          if [ -z "$URL" ]; then
+            if [ -n "$PROD_WEBAPP_NAME" ]; then
+              URL="https://${PROD_WEBAPP_NAME}.azurewebsites.net"
+            else
+              echo "No PROD_SMOKE_URL or PROD_WEBAPP_NAME configured"; exit 1
+            fi
+          fi
+          echo "Testing $URL"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || true)
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Smoke test passed"
+              exit 0
+            fi
+            sleep $((i*2))
+          done
+          echo "Smoke test failed for $URL"; exit 1
+
       - name: Deploy (placeholder)
         run: |
           echo "Deploying to DEV environment"

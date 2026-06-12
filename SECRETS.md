@@ -5,11 +5,17 @@ Add these repository secrets (Settings -> Secrets -> Actions) before enabling de
 - DEV_AZURE_CREDENTIALS: JSON output of `az ad sp create-for-rbac --name "github-actions-dev" --role contributor --scopes /subscriptions/{sub}` (store entire JSON)
 - DEV_WEBAPP_NAME: Name of the Azure Web App for dev (e.g. myapp-dev)
 
+- DEV_SMOKE_URL: Optional full URL to hit for smoke tests (overrides derived azurewebsites.net URL)
+
 - QA_AZURE_CREDENTIALS: JSON credentials for QA service principal
 - QA_WEBAPP_NAME: Name of the Azure Web App for qa
 
+- QA_SMOKE_URL: Optional full URL to hit for QA smoke tests
+
 - PROD_AZURE_CREDENTIALS: JSON credentials for Prod service principal
 - PROD_WEBAPP_NAME: Name of the Azure Web App for prod
+
+- PROD_SMOKE_URL: Optional full URL to hit for Prod smoke tests
 
 Notes:
 - Create a service principal and capture JSON with Azure CLI:
